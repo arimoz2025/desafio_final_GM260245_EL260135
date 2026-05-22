@@ -1,11 +1,9 @@
 using System;
 using System.IO;
 
-
-
 struct Libro
 {
-    public string Codigo;               // Formato: LIB00001 
+    public string Codigo;               // Formato: LIB00001 (8 caracteres)
     public string Titulo;
     public string Autor;
     public string Editorial;
@@ -34,7 +32,7 @@ struct Prestamo
     public string Estado;               // "activo" o "devuelto"
 }
 
-//clase principlal
+//Clase principal
 class Program
 {
     const int MAX_LIBROS    = 10;
@@ -54,7 +52,6 @@ class Program
     static string archivoUsuarios  = "Data/usuarios.txt";
     static string archivoPrestamos = "Data/prestamos.txt";
 
-    
     static void Main(string[] args)
     {
         if (!Directory.Exists(rutaData))
@@ -72,11 +69,11 @@ class Program
                     MenuGestionLibros();
                     break;
                 case 2:
-                    Console.WriteLine("\n  [Módulo B ]\n");
+                    Console.WriteLine("\n  [Módulo B - próximamente]\n");
                     Pausa();
                     break;
                 case 3:
-                    Console.WriteLine("\n  [Módulo C ]\n");
+                    Console.WriteLine("\n  [Módulo C - próximamente]\n");
                     Pausa();
                     break;
                 case 4:
@@ -105,7 +102,7 @@ class Program
         Console.WriteLine("╚══════════════════════════════════════════════╝");
     }
 
-    //Modulo A-Gestion de libros
+    //Modulo A-Gestión de libros
     static void MenuGestionLibros()
     {
         int opcion;
@@ -144,26 +141,56 @@ class Program
         Console.Clear();
         Console.WriteLine("=== REGISTRAR NUEVO LIBRO ===\n");
 
+        // Verificar capacidad máxima del arreglo 
+        if (totalLibros >= MAX_LIBROS)
+        {
+            Console.WriteLine("[!] Se alcanzó el límite máximo de libros (" + MAX_LIBROS + ").");
+            Pausa();
+            return;
+        }
+
         Libro l = new Libro();
 
-        Console.Write("Código (ej. LIB00001): ");
-        l.Codigo = Console.ReadLine().Trim().ToUpper();
+        // Validar código: 8 caracteres alfanuméricos 
+        do
+        {
+            Console.Write("Código (ej. LIB00001): ");
+            l.Codigo = Console.ReadLine().Trim().ToUpper();
 
-        Console.Write("Título: ");
-        l.Titulo = Console.ReadLine().Trim();
+            if (!ValidarCodigoLibro(l.Codigo))
+                Console.WriteLine("[!] Código inválido. Debe ser alfanumérico de exactamente 8 caracteres.\n");
+            else if (ExisteCodigoLibro(l.Codigo))
+                Console.WriteLine("[!] Ese código ya está registrado.\n");
+            else
+                break;
+        } while (true);
 
-        Console.Write("Autor: ");
-        l.Autor = Console.ReadLine().Trim();
+        // Campos de texto obligatorios 
+        l.Titulo    = LeerTextoObligatorio("Título: ");
+        l.Autor     = LeerTextoObligatorio("Autor: ");
+        l.Editorial = LeerTextoObligatorio("Editorial: ");
 
-        Console.Write("Editorial: ");
-        l.Editorial = Console.ReadLine().Trim();
+        // Validar año con if-else 
+        do
+        {
+            l.AnioPublicacion = LeerEntero("Año de publicación: ");
+            if (l.AnioPublicacion < 1900 || l.AnioPublicacion > DateTime.Now.Year)
+                Console.WriteLine("[!] El año debe estar entre 1900 y " + DateTime.Now.Year + ".");
+            else
+                break;
+        } while (true);
 
-        l.AnioPublicacion = LeerEntero("Año de publicación: ");
+        l.Categoria = LeerTextoObligatorio("Categoría: ");
 
-        Console.Write("Categoría: ");
-        l.Categoria = Console.ReadLine().Trim();
-
-        l.EjemplaresDisponibles = LeerEntero("Cantidad de ejemplares disponibles: ");
+        // Validar ejemplares: no negativos 
+        do
+        {
+            l.EjemplaresDisponibles = LeerEntero("Cantidad de ejemplares disponibles: ");
+            if (l.EjemplaresDisponibles < 0)
+                Console.WriteLine("[!] La cantidad no puede ser negativa.");
+            else
+                break;
+        } while (true);
 
         libros[totalLibros] = l;
         totalLibros++;
@@ -175,13 +202,13 @@ class Program
     static void BuscarLibro()
     {
         Console.Clear();
-        Console.WriteLine("-BUSCAR LIBRO POR CÓDIGO -\n");
+        Console.WriteLine("=== BUSCAR LIBRO POR CÓDIGO ===\n");
         Console.Write("Ingrese el código del libro: ");
         string codigo = Console.ReadLine().Trim().ToUpper();
 
         int indice = -1;
 
-        // Búsqueda lineal con for (Guía 5)
+        // Búsqueda lineal con for 
         for (int i = 0; i < totalLibros; i++)
         {
             if (libros[i].Codigo == codigo)
@@ -205,7 +232,7 @@ class Program
     static void ListarLibros()
     {
         Console.Clear();
-        Console.WriteLine("= LISTADO DE LIBROS REGISTRADOS =\n");
+        Console.WriteLine("=== LISTADO DE LIBROS REGISTRADOS ===\n");
 
         if (totalLibros == 0)
         {
@@ -213,7 +240,6 @@ class Program
         }
         else
         {
-            // Recorrer arreglo con for 
             for (int i = 0; i < totalLibros; i++)
             {
                 Console.WriteLine("--- Libro " + (i + 1) + " ---");
@@ -228,7 +254,7 @@ class Program
     static void EliminarLibro()
     {
         Console.Clear();
-        Console.WriteLine("= ELIMINAR LIBRO =\n");
+        Console.WriteLine("=== ELIMINAR LIBRO ===\n");
         Console.Write("Ingrese el código del libro a eliminar: ");
         string codigo = Console.ReadLine().Trim().ToUpper();
 
@@ -248,38 +274,76 @@ class Program
         }
         else
         {
-            Console.WriteLine("\nLibro encontrado:");
-            MostrarLibro(libros[indice]);
-            Console.Write("\n¿Confirma la eliminación? (s/n): ");
-            string confirmacion = Console.ReadLine().Trim().ToLower();
-
-            if (confirmacion == "s")
+            // Verificar que no tenga préstamos activos antes de eliminar
+            bool tienePrestamo = false;
+            for (int i = 0; i < totalPrestamos; i++)
             {
-                // Desplazar elementos con for (Guía 5)
-                for (int i = indice; i < totalLibros - 1; i++)
-                    libros[i] = libros[i + 1];
+                if (prestamos[i].CodigoLibro == codigo && prestamos[i].Estado == "activo")
+                {
+                    tienePrestamo = true;
+                    break;
+                }
+            }
 
-                libros[totalLibros - 1] = new Libro();
-                totalLibros--;
-                Console.WriteLine("[✓] Libro eliminado exitosamente.");
+            if (tienePrestamo)
+            {
+                Console.WriteLine("[!] No se puede eliminar: el libro tiene préstamos activos.");
             }
             else
             {
-                Console.WriteLine("Operación cancelada.");
+                Console.WriteLine("\nLibro encontrado:");
+                MostrarLibro(libros[indice]);
+                Console.Write("\n¿Confirma la eliminación? (s/n): ");
+                string confirmacion = Console.ReadLine().Trim().ToLower();
+
+                if (confirmacion == "s")
+                {
+                    // Desplazar elementos con for (Guía 5)
+                    for (int i = indice; i < totalLibros - 1; i++)
+                        libros[i] = libros[i + 1];
+
+                    libros[totalLibros - 1] = new Libro();
+                    totalLibros--;
+                    Console.WriteLine("[✓] Libro eliminado exitosamente.");
+                }
+                else
+                {
+                    Console.WriteLine("Operación cancelada.");
+                }
             }
         }
 
         Pausa();
     }
 
-    //metodos de ayuda
+    //validaciones
 
+    // Valida que el código tenga exactamente 8 caracteres alfanuméricos
+    static bool ValidarCodigoLibro(string codigo)
+    {
+        if (codigo.Length != 8) return false;
+        for (int i = 0; i < codigo.Length; i++)
+            if (!char.IsLetterOrDigit(codigo[i])) return false;
+        return true;
+    }
+
+    // Verifica si ya existe un libro con ese código
+    static bool ExisteCodigoLibro(string codigo)
+    {
+        for (int i = 0; i < totalLibros; i++)
+            if (libros[i].Codigo == codigo) return true;
+        return false;
+    }
+
+    // Retorna el índice del libro o -1 si no existe
     static int BuscarIndiceLibro(string codigo)
     {
         for (int i = 0; i < totalLibros; i++)
             if (libros[i].Codigo == codigo) return i;
         return -1;
     }
+
+   //metodos basicos
 
     static void MostrarLibro(Libro l)
     {
@@ -311,6 +375,7 @@ class Program
         Console.WriteLine("  Devolución   : " + p.FechaDevolucion);
         Console.WriteLine("  Estado       : " + p.Estado);
     }
+
 
     static int LeerEntero(string mensaje)
     {
