@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 
+
+
 struct Libro
 {
     public string Codigo;
@@ -83,7 +85,7 @@ class Program
         } while (opcion != 4);
     }
 
-   //menu principal
+    //menu principal
     static void MostrarMenuPrincipal()
     {
         Console.Clear();
@@ -97,7 +99,7 @@ class Program
         Console.WriteLine("╚══════════════════════════════════════════════╝");
     }
 
-    //modulo A-Gestión de libros
+    //Modulo A-Gestión de libros
     static void MenuGestionLibros()
     {
         int opcion;
@@ -199,11 +201,7 @@ class Program
         int indice = -1;
         for (int i = 0; i < totalLibros; i++)
         {
-            if (libros[i].Codigo == codigo)
-            {
-                indice = i;
-                break;
-            }
+            if (libros[i].Codigo == codigo) { indice = i; break; }
         }
 
         if (indice == -1)
@@ -292,7 +290,7 @@ class Program
         Pausa();
     }
 
-    //modulo B-Gestión de usuarios
+    //Modulo B-Gestión de usuario
     static void MenuGestionUsuarios()
     {
         int opcion;
@@ -340,14 +338,34 @@ class Program
 
         Usuario u = new Usuario();
 
-        Console.Write("Carné (8 dígitos): ");
-        u.Carne = Console.ReadLine().Trim();
+        // Validar carné: exactamente 8 dígitos numéricos 
+        do
+        {
+            Console.Write("Carné (8 dígitos): ");
+            u.Carne = Console.ReadLine().Trim();
 
-        u.NombreCompleto    = LeerTextoObligatorio("Nombre completo: ");
-        u.Carrera           = LeerTextoObligatorio("Carrera: ");
+            if (!ValidarCarne(u.Carne))
+                Console.WriteLine("[!] El carné debe tener exactamente 8 dígitos numéricos.\n");
+            else if (ExisteCarneUsuario(u.Carne))
+                Console.WriteLine("[!] Ese carné ya está registrado.\n");
+            else
+                break;
+        } while (true);
 
-        Console.Write("Correo electrónico: ");
-        u.CorreoElectronico = Console.ReadLine().Trim();
+        u.NombreCompleto = LeerTextoObligatorio("Nombre completo: ");
+        u.Carrera        = LeerTextoObligatorio("Carrera: ");
+
+        // Validar correo: debe contener '@' y un punto después 
+        do
+        {
+            Console.Write("Correo electrónico: ");
+            u.CorreoElectronico = Console.ReadLine().Trim();
+
+            if (!ValidarCorreo(u.CorreoElectronico))
+                Console.WriteLine("[!] Correo inválido. Debe contener '@' y un punto después.\n");
+            else
+                break;
+        } while (true);
 
         u.Telefono = LeerTextoObligatorio("Teléfono: ");
         u.Estado   = "activo";
@@ -392,7 +410,7 @@ class Program
 
         bool encontrado = false;
 
-        // Búsqueda parcial con Contains (Guía 10 – Cadenas)
+        // Búsqueda parcial con Contains 
         for (int i = 0; i < totalUsuarios; i++)
         {
             if (usuarios[i].NombreCompleto.ToLower().Contains(nombre))
@@ -431,8 +449,9 @@ class Program
         Pausa();
     }
 
-    //validadción
+   //validaciones
 
+    // Código de libro: 8 caracteres alfanuméricos
     static bool ValidarCodigoLibro(string codigo)
     {
         if (codigo.Length != 8) return false;
@@ -441,10 +460,35 @@ class Program
         return true;
     }
 
+    // Carné: exactamente 8 dígitos numéricos
+    static bool ValidarCarne(string carne)
+    {
+        if (carne.Length != 8) return false;
+        for (int i = 0; i < carne.Length; i++)
+            if (!char.IsDigit(carne[i])) return false;
+        return true;
+    }
+
+    // Correo: debe tener '@' y un punto después de él
+    static bool ValidarCorreo(string correo)
+    {
+        int posArroba = correo.IndexOf('@');
+        if (posArroba < 0) return false;
+        int posPunto = correo.IndexOf('.', posArroba);
+        return posPunto > posArroba;
+    }
+
     static bool ExisteCodigoLibro(string codigo)
     {
         for (int i = 0; i < totalLibros; i++)
             if (libros[i].Codigo == codigo) return true;
+        return false;
+    }
+
+    static bool ExisteCarneUsuario(string carne)
+    {
+        for (int i = 0; i < totalUsuarios; i++)
+            if (usuarios[i].Carne == carne) return true;
         return false;
     }
 
@@ -462,7 +506,7 @@ class Program
         return -1;
     }
 
-    //metodos basicos
+    
 
     static void MostrarLibro(Libro l)
     {
@@ -495,7 +539,7 @@ class Program
         Console.WriteLine("  Estado       : " + p.Estado);
     }
 
-   
+    
     static int LeerEntero(string mensaje)
     {
         int valor;
