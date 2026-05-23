@@ -3,7 +3,7 @@ using System.IO;
 
 struct Libro
 {
-    public string Codigo;               // Formato: LIB00001 (8 caracteres)
+    public string Codigo;
     public string Titulo;
     public string Autor;
     public string Editorial;
@@ -14,7 +14,7 @@ struct Libro
 
 struct Usuario
 {
-    public string Carne;                // 8 dígitos numéricos
+    public string Carne;
     public string NombreCompleto;
     public string Carrera;
     public string CorreoElectronico;
@@ -32,7 +32,6 @@ struct Prestamo
     public string Estado;               // "activo" o "devuelto"
 }
 
-//Clase principal
 class Program
 {
     const int MAX_LIBROS    = 10;
@@ -52,6 +51,7 @@ class Program
     static string archivoUsuarios  = "Data/usuarios.txt";
     static string archivoPrestamos = "Data/prestamos.txt";
 
+    
     static void Main(string[] args)
     {
         if (!Directory.Exists(rutaData))
@@ -65,13 +65,8 @@ class Program
 
             switch (opcion)
             {
-                case 1:
-                    MenuGestionLibros();
-                    break;
-                case 2:
-                    Console.WriteLine("\n  [Módulo B - próximamente]\n");
-                    Pausa();
-                    break;
+                case 1: MenuGestionLibros();   break;
+                case 2: MenuGestionUsuarios(); break;
                 case 3:
                     Console.WriteLine("\n  [Módulo C - próximamente]\n");
                     Pausa();
@@ -88,7 +83,7 @@ class Program
         } while (opcion != 4);
     }
 
-    //menu principal
+   //menu principal
     static void MostrarMenuPrincipal()
     {
         Console.Clear();
@@ -102,7 +97,7 @@ class Program
         Console.WriteLine("╚══════════════════════════════════════════════╝");
     }
 
-    //Modulo A-Gestión de libros
+    //modulo A-Gestión de libros
     static void MenuGestionLibros()
     {
         int opcion;
@@ -141,7 +136,6 @@ class Program
         Console.Clear();
         Console.WriteLine("=== REGISTRAR NUEVO LIBRO ===\n");
 
-        // Verificar capacidad máxima del arreglo 
         if (totalLibros >= MAX_LIBROS)
         {
             Console.WriteLine("[!] Se alcanzó el límite máximo de libros (" + MAX_LIBROS + ").");
@@ -151,7 +145,6 @@ class Program
 
         Libro l = new Libro();
 
-        // Validar código: 8 caracteres alfanuméricos 
         do
         {
             Console.Write("Código (ej. LIB00001): ");
@@ -165,12 +158,10 @@ class Program
                 break;
         } while (true);
 
-        // Campos de texto obligatorios 
         l.Titulo    = LeerTextoObligatorio("Título: ");
         l.Autor     = LeerTextoObligatorio("Autor: ");
         l.Editorial = LeerTextoObligatorio("Editorial: ");
 
-        // Validar año con if-else 
         do
         {
             l.AnioPublicacion = LeerEntero("Año de publicación: ");
@@ -182,7 +173,6 @@ class Program
 
         l.Categoria = LeerTextoObligatorio("Categoría: ");
 
-        // Validar ejemplares: no negativos 
         do
         {
             l.EjemplaresDisponibles = LeerEntero("Cantidad de ejemplares disponibles: ");
@@ -207,8 +197,6 @@ class Program
         string codigo = Console.ReadLine().Trim().ToUpper();
 
         int indice = -1;
-
-        // Búsqueda lineal con for 
         for (int i = 0; i < totalLibros; i++)
         {
             if (libros[i].Codigo == codigo)
@@ -235,18 +223,14 @@ class Program
         Console.WriteLine("=== LISTADO DE LIBROS REGISTRADOS ===\n");
 
         if (totalLibros == 0)
-        {
             Console.WriteLine("  No hay libros registrados.");
-        }
         else
-        {
             for (int i = 0; i < totalLibros; i++)
             {
                 Console.WriteLine("--- Libro " + (i + 1) + " ---");
                 MostrarLibro(libros[i]);
                 Console.WriteLine();
             }
-        }
 
         Pausa();
     }
@@ -261,11 +245,7 @@ class Program
         int indice = -1;
         for (int i = 0; i < totalLibros; i++)
         {
-            if (libros[i].Codigo == codigo)
-            {
-                indice = i;
-                break;
-            }
+            if (libros[i].Codigo == codigo) { indice = i; break; }
         }
 
         if (indice == -1)
@@ -274,7 +254,6 @@ class Program
         }
         else
         {
-            // Verificar que no tenga préstamos activos antes de eliminar
             bool tienePrestamo = false;
             for (int i = 0; i < totalPrestamos; i++)
             {
@@ -298,7 +277,6 @@ class Program
 
                 if (confirmacion == "s")
                 {
-                    // Desplazar elementos con for (Guía 5)
                     for (int i = indice; i < totalLibros - 1; i++)
                         libros[i] = libros[i + 1];
 
@@ -307,18 +285,154 @@ class Program
                     Console.WriteLine("[✓] Libro eliminado exitosamente.");
                 }
                 else
-                {
                     Console.WriteLine("Operación cancelada.");
-                }
             }
         }
 
         Pausa();
     }
 
-    //validaciones
+    //modulo B-Gestión de usuarios
+    static void MenuGestionUsuarios()
+    {
+        int opcion;
+        do
+        {
+            Console.Clear();
+            Console.WriteLine("╔══════════════════════════════════════════════╗");
+            Console.WriteLine("║        MÓDULO B – GESTIÓN DE USUARIOS        ║");
+            Console.WriteLine("╠══════════════════════════════════════════════╣");
+            Console.WriteLine("║  1. Registrar nuevo usuario                  ║");
+            Console.WriteLine("║  2. Buscar usuario por carné                 ║");
+            Console.WriteLine("║  3. Buscar usuario por nombre                ║");
+            Console.WriteLine("║  4. Listar todos los usuarios                ║");
+            Console.WriteLine("║  0. Volver al menú principal                 ║");
+            Console.WriteLine("╚══════════════════════════════════════════════╝");
 
-    // Valida que el código tenga exactamente 8 caracteres alfanuméricos
+            opcion = LeerEntero("Seleccione una opción: ");
+
+            switch (opcion)
+            {
+                case 1: RegistrarUsuario();       break;
+                case 2: BuscarUsuarioPorCarne();  break;
+                case 3: BuscarUsuarioPorNombre(); break;
+                case 4: ListarUsuarios();         break;
+                case 0: break;
+                default:
+                    Console.WriteLine("\n  [!] Opción inválida.\n");
+                    Pausa();
+                    break;
+            }
+        } while (opcion != 0);
+    }
+
+    static void RegistrarUsuario()
+    {
+        Console.Clear();
+        Console.WriteLine("=== REGISTRAR NUEVO USUARIO ===\n");
+
+        if (totalUsuarios >= MAX_USUARIOS)
+        {
+            Console.WriteLine("[!] Se alcanzó el límite máximo de usuarios (" + MAX_USUARIOS + ").");
+            Pausa();
+            return;
+        }
+
+        Usuario u = new Usuario();
+
+        Console.Write("Carné (8 dígitos): ");
+        u.Carne = Console.ReadLine().Trim();
+
+        u.NombreCompleto    = LeerTextoObligatorio("Nombre completo: ");
+        u.Carrera           = LeerTextoObligatorio("Carrera: ");
+
+        Console.Write("Correo electrónico: ");
+        u.CorreoElectronico = Console.ReadLine().Trim();
+
+        u.Telefono = LeerTextoObligatorio("Teléfono: ");
+        u.Estado   = "activo";
+
+        usuarios[totalUsuarios] = u;
+        totalUsuarios++;
+
+        Console.WriteLine("\n[✓] Usuario registrado exitosamente.");
+        Pausa();
+    }
+
+    static void BuscarUsuarioPorCarne()
+    {
+        Console.Clear();
+        Console.WriteLine("=== BUSCAR USUARIO POR CARNÉ ===\n");
+        Console.Write("Ingrese el carné: ");
+        string carne = Console.ReadLine().Trim();
+
+        int indice = -1;
+        for (int i = 0; i < totalUsuarios; i++)
+        {
+            if (usuarios[i].Carne == carne) { indice = i; break; }
+        }
+
+        if (indice == -1)
+            Console.WriteLine("[!] No se encontró usuario con ese carné.");
+        else
+        {
+            Console.WriteLine("\n--- Datos del Usuario ---");
+            MostrarUsuario(usuarios[indice]);
+        }
+
+        Pausa();
+    }
+
+    static void BuscarUsuarioPorNombre()
+    {
+        Console.Clear();
+        Console.WriteLine("=== BUSCAR USUARIO POR NOMBRE ===\n");
+        Console.Write("Ingrese el nombre (o parte de él): ");
+        string nombre = Console.ReadLine().Trim().ToLower();
+
+        bool encontrado = false;
+
+        // Búsqueda parcial con Contains (Guía 10 – Cadenas)
+        for (int i = 0; i < totalUsuarios; i++)
+        {
+            if (usuarios[i].NombreCompleto.ToLower().Contains(nombre))
+            {
+                if (!encontrado)
+                {
+                    Console.WriteLine("\n--- Resultados ---");
+                    encontrado = true;
+                }
+                MostrarUsuario(usuarios[i]);
+                Console.WriteLine();
+            }
+        }
+
+        if (!encontrado)
+            Console.WriteLine("[!] No se encontraron usuarios con ese nombre.");
+
+        Pausa();
+    }
+
+    static void ListarUsuarios()
+    {
+        Console.Clear();
+        Console.WriteLine("=== LISTADO DE USUARIOS REGISTRADOS ===\n");
+
+        if (totalUsuarios == 0)
+            Console.WriteLine("  No hay usuarios registrados.");
+        else
+            for (int i = 0; i < totalUsuarios; i++)
+            {
+                Console.WriteLine("--- Usuario " + (i + 1) + " ---");
+                MostrarUsuario(usuarios[i]);
+                Console.WriteLine();
+            }
+
+        Pausa();
+    }
+
+    //validadción
+
     static bool ValidarCodigoLibro(string codigo)
     {
         if (codigo.Length != 8) return false;
@@ -327,7 +441,6 @@ class Program
         return true;
     }
 
-    // Verifica si ya existe un libro con ese código
     static bool ExisteCodigoLibro(string codigo)
     {
         for (int i = 0; i < totalLibros; i++)
@@ -335,7 +448,6 @@ class Program
         return false;
     }
 
-    // Retorna el índice del libro o -1 si no existe
     static int BuscarIndiceLibro(string codigo)
     {
         for (int i = 0; i < totalLibros; i++)
@@ -343,7 +455,14 @@ class Program
         return -1;
     }
 
-   //metodos basicos
+    static int BuscarIndiceUsuario(string carne)
+    {
+        for (int i = 0; i < totalUsuarios; i++)
+            if (usuarios[i].Carne == carne) return i;
+        return -1;
+    }
+
+    //metodos basicos
 
     static void MostrarLibro(Libro l)
     {
@@ -376,7 +495,7 @@ class Program
         Console.WriteLine("  Estado       : " + p.Estado);
     }
 
-
+   
     static int LeerEntero(string mensaje)
     {
         int valor;
