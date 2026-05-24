@@ -1,6 +1,6 @@
+
 using System;
 using System.IO;
-
 
 
 struct Libro
@@ -21,7 +21,7 @@ struct Usuario
     public string Carrera;
     public string CorreoElectronico;
     public string Telefono;
-    public string Estado;               // "activo" o "inactivo"
+    public string Estado;               // "activo" o "devuelto"
 }
 
 struct Prestamo
@@ -31,7 +31,7 @@ struct Prestamo
     public string CodigoLibro;
     public string FechaPrestamo;        // Formato: dd/mm/yyyy
     public string FechaDevolucion;      // Formato: dd/mm/yyyy
-    public string Estado;               // "activo" o "devuelto"
+    public string Estado;
 }
 
 class Program
@@ -77,10 +77,8 @@ class Program
                     Pausa();
                     break;
             }
-
         } while (opcion != 4);
     }
-
 
     static void MostrarMenuPrincipal()
     {
@@ -334,7 +332,7 @@ class Program
         u.NombreCompleto = LeerTextoObligatorio("Nombre completo: ");
         u.Carrera        = LeerTextoObligatorio("Carrera: ");
 
-                // Validar correo: debe contener '@' y un punto después 
+        // Validar correo: debe contener '@' y un punto después 
 
         do
         {
@@ -467,25 +465,59 @@ class Program
 
         Prestamo p = new Prestamo();
 
-        Console.Write("Carné del usuario: ");
-        p.CarneUsuario = Console.ReadLine().Trim();
+        do
+        {
+            Console.Write("Carné del usuario: ");
+            p.CarneUsuario = Console.ReadLine().Trim();
+            int idxU = BuscarIndiceUsuario(p.CarneUsuario);
 
-        Console.Write("Código del libro: ");
-        p.CodigoLibro = Console.ReadLine().Trim().ToUpper();
+            if (idxU == -1)
+                Console.WriteLine("[!] No existe usuario con ese carné.\n");
+            else if (usuarios[idxU].Estado != "activo")
+                Console.WriteLine("[!] El usuario está inactivo. No puede pedir préstamos.\n");
+            else
+                break;
+        } while (true);
 
-        Console.Write("Fecha de préstamo (dd/mm/yyyy): ");
-        p.FechaPrestamo = Console.ReadLine().Trim();
+        do
+        {
+            Console.Write("Código del libro: ");
+            p.CodigoLibro = Console.ReadLine().Trim().ToUpper();
+            int idxL = BuscarIndiceLibro(p.CodigoLibro);
 
-        Console.Write("Fecha estimada de devolución (dd/mm/yyyy): ");
-        p.FechaDevolucion = Console.ReadLine().Trim();
+            if (idxL == -1)
+                Console.WriteLine("[!] No existe libro con ese código.\n");
+            else if (libros[idxL].EjemplaresDisponibles <= 0)
+                Console.WriteLine("[!] No hay ejemplares disponibles de ese libro.\n");
+            else
+                break;
+        } while (true);
+
+        do
+        {
+            Console.Write("Fecha de préstamo (dd/mm/yyyy): ");
+            p.FechaPrestamo = Console.ReadLine().Trim();
+            if (!ValidarFecha(p.FechaPrestamo))
+                Console.WriteLine("[!] Formato inválido. Use dd/mm/yyyy.\n");
+            else
+                break;
+        } while (true);
+
+        do
+        {
+            Console.Write("Fecha estimada de devolución (dd/mm/yyyy): ");
+            p.FechaDevolucion = Console.ReadLine().Trim();
+            if (!ValidarFecha(p.FechaDevolucion))
+                Console.WriteLine("[!] Formato inválido. Use dd/mm/yyyy.\n");
+            else
+                break;
+        } while (true);
 
         p.Id     = totalPrestamos + 1;
         p.Estado = "activo";
 
-
         int indiceLibro = BuscarIndiceLibro(p.CodigoLibro);
-        if (indiceLibro != -1)
-            libros[indiceLibro].EjemplaresDisponibles--;
+        libros[indiceLibro].EjemplaresDisponibles--;
 
         prestamos[totalPrestamos] = p;
         totalPrestamos++;
@@ -510,7 +542,7 @@ class Program
         }
         else if (prestamos[indice].Estado == "devuelto")
         {
-            Console.WriteLine("[!] Ese préstamo ya fue devuelto.");
+            Console.WriteLine("[!] Ese préstamo ya fue devuelto anteriormente.");
         }
         else
         {
@@ -598,7 +630,6 @@ class Program
         Console.Clear();
         Console.WriteLine("=== REPORTE GENERAL DE PRÉSTAMOS ===\n");
 
-
         int[,] resumen = new int[MAX_LIBROS, 2];
 
         int activos   = 0;
@@ -606,18 +637,14 @@ class Program
 
         for (int i = 0; i < totalPrestamos; i++)
         {
-            if (prestamos[i].Estado == "activo")
-                activos++;
-            else
-                devueltos++;
+            if (prestamos[i].Estado == "activo") activos++;
+            else devueltos++;
 
             int idxL = BuscarIndiceLibro(prestamos[i].CodigoLibro);
             if (idxL != -1)
             {
-                if (prestamos[i].Estado == "activo")
-                    resumen[idxL, 0]++;
-                else
-                    resumen[idxL, 1]++;
+                if (prestamos[i].Estado == "activo") resumen[idxL, 0]++;
+                else resumen[idxL, 1]++;
             }
         }
 
@@ -634,7 +661,6 @@ class Program
             string titulo = libros[i].Titulo.Length > 28
                 ? libros[i].Titulo.Substring(0, 28) + ".."
                 : libros[i].Titulo;
-
             Console.WriteLine("{0,-10} {1,-30} {2,-10} {3,-10}",
                 libros[i].Codigo, titulo, resumen[i, 0], resumen[i, 1]);
         }
@@ -648,7 +674,6 @@ class Program
         Console.WriteLine("=== EXPORTAR REPORTE A ARCHIVO ===\n");
 
         string nombreArchivo = "Data/reporte_prestamos.txt";
-
 
         using (StreamWriter sw = new StreamWriter(nombreArchivo, false))
         {
@@ -674,10 +699,9 @@ class Program
         Pausa();
     }
 
-       //validaciones
+   //validaciones
 
-     // Código de libro: 8 caracteres alfanuméricos
-
+    // Código de libro: 8 caracteres alfanuméricos
     static bool ValidarCodigoLibro(string codigo)
     {
         if (codigo.Length != 8) return false;
@@ -702,6 +726,22 @@ class Program
         if (posArroba < 0) return false;
         int posPunto = correo.IndexOf('.', posArroba);
         return posPunto > posArroba;
+    }
+
+    static bool ValidarFecha(string fecha)
+    {
+        if (fecha.Length != 10) return false;
+        if (fecha[2] != '/' || fecha[5] != '/') return false;
+
+        string dd   = fecha.Substring(0, 2);
+        string mm   = fecha.Substring(3, 2);
+        string yyyy = fecha.Substring(6, 4);
+
+        foreach (char c in dd)   if (!char.IsDigit(c)) return false;
+        foreach (char c in mm)   if (!char.IsDigit(c)) return false;
+        foreach (char c in yyyy) if (!char.IsDigit(c)) return false;
+
+        return true;
     }
 
     static bool ExisteCodigoLibro(string codigo)
