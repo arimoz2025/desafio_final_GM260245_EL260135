@@ -21,7 +21,7 @@ struct Usuario
     public string Carrera;
     public string CorreoElectronico;
     public string Telefono;
-    public string Estado;               // "activo" o "devuelto"
+    public string Estado;               // "activo" o "inactivo"
 }
 
 struct Prestamo
@@ -31,7 +31,7 @@ struct Prestamo
     public string CodigoLibro;
     public string FechaPrestamo;        // Formato: dd/mm/yyyy
     public string FechaDevolucion;      // Formato: dd/mm/yyyy
-    public string Estado;
+    public string Estado;               // "activo" o "devuelto"
 }
 
 class Program
@@ -58,6 +58,8 @@ class Program
         if (!Directory.Exists(rutaData))
             Directory.CreateDirectory(rutaData);
 
+        CargarDatos();
+
         int opcion;
         do
         {
@@ -70,7 +72,8 @@ class Program
                 case 2: MenuGestionUsuarios();  break;
                 case 3: MenuGestionPrestamos(); break;
                 case 4:
-                    Console.WriteLine("\n  ¡Hasta pronto!\n");
+                    GuardarDatos();
+                    Console.WriteLine("\n  Datos guardados. ¡Hasta pronto!\n");
                     break;
                 default:
                     Console.WriteLine("\n  [!] Opción inválida. Intente de nuevo.\n");
@@ -474,7 +477,7 @@ class Program
             if (idxU == -1)
                 Console.WriteLine("[!] No existe usuario con ese carné.\n");
             else if (usuarios[idxU].Estado != "activo")
-                Console.WriteLine("[!] El usuario está inactivo. No puede pedir préstamos.\n");
+                Console.WriteLine("[!] El usuario está inactivo.\n");
             else
                 break;
         } while (true);
@@ -488,7 +491,7 @@ class Program
             if (idxL == -1)
                 Console.WriteLine("[!] No existe libro con ese código.\n");
             else if (libros[idxL].EjemplaresDisponibles <= 0)
-                Console.WriteLine("[!] No hay ejemplares disponibles de ese libro.\n");
+                Console.WriteLine("[!] No hay ejemplares disponibles.\n");
             else
                 break;
         } while (true);
@@ -537,13 +540,9 @@ class Program
             if (prestamos[i].Id == id) { indice = i; break; }
 
         if (indice == -1)
-        {
             Console.WriteLine("[!] No se encontró préstamo con ese ID.");
-        }
         else if (prestamos[indice].Estado == "devuelto")
-        {
-            Console.WriteLine("[!] Ese préstamo ya fue devuelto anteriormente.");
-        }
+            Console.WriteLine("[!] Ese préstamo ya fue devuelto.");
         else
         {
             Console.WriteLine("\nPréstamo encontrado:");
@@ -554,11 +553,9 @@ class Program
             if (conf == "s")
             {
                 prestamos[indice].Estado = "devuelto";
-
                 int idxLibro = BuscarIndiceLibro(prestamos[indice].CodigoLibro);
                 if (idxLibro != -1)
                     libros[idxLibro].EjemplaresDisponibles++;
-
                 Console.WriteLine("[✓] Devolución registrada. Inventario actualizado.");
             }
             else
@@ -579,11 +576,7 @@ class Program
         {
             if (prestamos[i].CarneUsuario == carne && prestamos[i].Estado == "activo")
             {
-                if (!encontrado)
-                {
-                    Console.WriteLine("Préstamos activos para carné " + carne + ":\n");
-                    encontrado = true;
-                }
+                if (!encontrado) { Console.WriteLine("Préstamos activos para carné " + carne + ":\n"); encontrado = true; }
                 MostrarPrestamo(prestamos[i]);
                 Console.WriteLine();
             }
@@ -605,9 +598,7 @@ class Program
             if (prestamos[i].Id == id) { indice = i; break; }
 
         if (indice == -1)
-        {
             Console.WriteLine("[!] No se encontró préstamo con ese ID.");
-        }
         else
         {
             Console.WriteLine("Estado actual: " + prestamos[indice].Estado);
@@ -631,9 +622,7 @@ class Program
         Console.WriteLine("=== REPORTE GENERAL DE PRÉSTAMOS ===\n");
 
         int[,] resumen = new int[MAX_LIBROS, 2];
-
-        int activos   = 0;
-        int devueltos = 0;
+        int activos = 0, devueltos = 0;
 
         for (int i = 0; i < totalPrestamos; i++)
         {
@@ -648,10 +637,9 @@ class Program
             }
         }
 
-        Console.WriteLine("Total préstamos registrados : " + totalPrestamos);
-        Console.WriteLine("Préstamos activos           : " + activos);
-        Console.WriteLine("Préstamos devueltos         : " + devueltos);
-
+        Console.WriteLine("Total préstamos : " + totalPrestamos);
+        Console.WriteLine("Activos         : " + activos);
+        Console.WriteLine("Devueltos       : " + devueltos);
         Console.WriteLine("\n--- Resumen por libro ---");
         Console.WriteLine("{0,-10} {1,-30} {2,-10} {3,-10}", "Código", "Título", "Activos", "Devueltos");
         Console.WriteLine(new string('-', 65));
@@ -659,12 +647,10 @@ class Program
         for (int i = 0; i < totalLibros; i++)
         {
             string titulo = libros[i].Titulo.Length > 28
-                ? libros[i].Titulo.Substring(0, 28) + ".."
-                : libros[i].Titulo;
+                ? libros[i].Titulo.Substring(0, 28) + ".." : libros[i].Titulo;
             Console.WriteLine("{0,-10} {1,-30} {2,-10} {3,-10}",
                 libros[i].Codigo, titulo, resumen[i, 0], resumen[i, 1]);
         }
-
         Pausa();
     }
 
@@ -691,12 +677,160 @@ class Program
                 sw.WriteLine("Estado      : " + prestamos[i].Estado);
                 sw.WriteLine(new string('-', 40));
             }
-
             sw.WriteLine("Total registros: " + totalPrestamos);
         }
 
         Console.WriteLine("[✓] Reporte exportado a: " + nombreArchivo);
         Pausa();
+    }
+
+
+    static void CargarDatos()
+    {
+        CargarLibros();
+        CargarUsuarios();
+        CargarPrestamos();
+    }
+
+    static void GuardarDatos()
+    {
+        GuardarLibros();
+        GuardarUsuarios();
+        GuardarPrestamos();
+    }
+
+    static void CargarLibros()
+    {
+        if (!File.Exists(archivoLibros)) return;
+        totalLibros = 0;
+
+        using (StreamReader sr = new StreamReader(archivoLibros))
+        {
+            string linea;
+            while ((linea = sr.ReadLine()) != null && totalLibros < MAX_LIBROS)
+            {
+                if (string.IsNullOrWhiteSpace(linea)) continue;
+                string[] campos = linea.Split(',');
+
+                if (campos.Length == 7)
+                {
+                    Libro l = new Libro();
+                    l.Codigo                = campos[0].Trim();
+                    l.Titulo                = campos[1].Trim();
+                    l.Autor                 = campos[2].Trim();
+                    l.Editorial             = campos[3].Trim();
+                    l.AnioPublicacion       = int.Parse(campos[4].Trim());
+                    l.Categoria             = campos[5].Trim();
+                    l.EjemplaresDisponibles = int.Parse(campos[6].Trim());
+                    libros[totalLibros]     = l;
+                    totalLibros++;
+                }
+            }
+        }
+    }
+
+    static void GuardarLibros()
+    {
+        using (StreamWriter sw = new StreamWriter(archivoLibros, false))
+        {
+            for (int i = 0; i < totalLibros; i++)
+                sw.WriteLine(
+                    libros[i].Codigo + "," +
+                    libros[i].Titulo + "," +
+                    libros[i].Autor  + "," +
+                    libros[i].Editorial + "," +
+                    libros[i].AnioPublicacion + "," +
+                    libros[i].Categoria + "," +
+                    libros[i].EjemplaresDisponibles);
+        }
+    }
+
+    static void CargarUsuarios()
+    {
+        if (!File.Exists(archivoUsuarios)) return;
+        totalUsuarios = 0;
+
+        using (StreamReader sr = new StreamReader(archivoUsuarios))
+        {
+            string linea;
+            while ((linea = sr.ReadLine()) != null && totalUsuarios < MAX_USUARIOS)
+            {
+                if (string.IsNullOrWhiteSpace(linea)) continue;
+                string[] campos = linea.Split('|');
+
+                if (campos.Length == 6)
+                {
+                    Usuario u = new Usuario();
+                    u.Carne             = campos[0].Trim();
+                    u.NombreCompleto    = campos[1].Trim();
+                    u.Carrera           = campos[2].Trim();
+                    u.CorreoElectronico = campos[3].Trim();
+                    u.Telefono          = campos[4].Trim();
+                    u.Estado            = campos[5].Trim();
+                    usuarios[totalUsuarios] = u;
+                    totalUsuarios++;
+                }
+            }
+        }
+    }
+
+    static void GuardarUsuarios()
+    {
+        using (StreamWriter sw = new StreamWriter(archivoUsuarios, false))
+        {
+            for (int i = 0; i < totalUsuarios; i++)
+                sw.WriteLine(
+                    usuarios[i].Carne + "|" +
+                    usuarios[i].NombreCompleto + "|" +
+                    usuarios[i].Carrera + "|" +
+                    usuarios[i].CorreoElectronico + "|" +
+                    usuarios[i].Telefono + "|" +
+                    usuarios[i].Estado);
+        }
+    }
+
+    static void CargarPrestamos()
+    {
+        if (!File.Exists(archivoPrestamos)) return;
+        totalPrestamos = 0;
+
+        using (StreamReader sr = new StreamReader(archivoPrestamos))
+        {
+            string linea;
+            while ((linea = sr.ReadLine()) != null && totalPrestamos < MAX_PRESTAMOS)
+            {
+                if (string.IsNullOrWhiteSpace(linea)) continue;
+                string[] campos = linea.Split('|');
+
+                if (campos.Length == 6)
+                {
+                    Prestamo p = new Prestamo();
+                    p.Id              = int.Parse(campos[0].Trim());
+                    p.CarneUsuario    = campos[1].Trim();
+                    p.CodigoLibro     = campos[2].Trim();
+                    p.FechaPrestamo   = campos[3].Trim();
+                    p.FechaDevolucion = campos[4].Trim();
+                    p.Estado          = campos[5].Trim();
+                    prestamos[totalPrestamos] = p;
+                    totalPrestamos++;
+                }
+            }
+        }
+    }
+
+    static void GuardarPrestamos()
+    {
+        using (StreamWriter sw = new StreamWriter(archivoPrestamos, false))
+        {
+            for (int i = 0; i < totalPrestamos; i++)
+                sw.WriteLine(
+                    prestamos[i].Id + "|" +
+                    prestamos[i].CarneUsuario + "|" +
+                    prestamos[i].CodigoLibro + "|" +
+                    prestamos[i].FechaPrestamo + "|" +
+                    prestamos[i].FechaDevolucion + "|" +
+                    prestamos[i].Estado);
+        }
     }
 
    //validaciones
@@ -732,15 +866,12 @@ class Program
     {
         if (fecha.Length != 10) return false;
         if (fecha[2] != '/' || fecha[5] != '/') return false;
-
-        string dd   = fecha.Substring(0, 2);
-        string mm   = fecha.Substring(3, 2);
+        string dd = fecha.Substring(0, 2);
+        string mm = fecha.Substring(3, 2);
         string yyyy = fecha.Substring(6, 4);
-
         foreach (char c in dd)   if (!char.IsDigit(c)) return false;
         foreach (char c in mm)   if (!char.IsDigit(c)) return false;
         foreach (char c in yyyy) if (!char.IsDigit(c)) return false;
-
         return true;
     }
 
