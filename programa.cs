@@ -53,7 +53,6 @@ class Program
     static string archivoUsuarios  = "Data/usuarios.txt";
     static string archivoPrestamos = "Data/prestamos.txt";
 
-    
     static void Main(string[] args)
     {
         if (!Directory.Exists(rutaData))
@@ -67,12 +66,9 @@ class Program
 
             switch (opcion)
             {
-                case 1: MenuGestionLibros();   break;
-                case 2: MenuGestionUsuarios(); break;
-                case 3:
-                    Console.WriteLine("\n  [Módulo C - próximamente]\n");
-                    Pausa();
-                    break;
+                case 1: MenuGestionLibros();    break;
+                case 2: MenuGestionUsuarios();  break;
+                case 3: MenuGestionPrestamos(); break;
                 case 4:
                     Console.WriteLine("\n  ¡Hasta pronto!\n");
                     break;
@@ -85,7 +81,7 @@ class Program
         } while (opcion != 4);
     }
 
-    //menu principal
+
     static void MostrarMenuPrincipal()
     {
         Console.Clear();
@@ -99,7 +95,6 @@ class Program
         Console.WriteLine("╚══════════════════════════════════════════════╝");
     }
 
-    //Modulo A-Gestión de libros
     static void MenuGestionLibros()
     {
         int opcion;
@@ -151,7 +146,6 @@ class Program
         {
             Console.Write("Código (ej. LIB00001): ");
             l.Codigo = Console.ReadLine().Trim().ToUpper();
-
             if (!ValidarCodigoLibro(l.Codigo))
                 Console.WriteLine("[!] Código inválido. Debe ser alfanumérico de exactamente 8 caracteres.\n");
             else if (ExisteCodigoLibro(l.Codigo))
@@ -186,7 +180,6 @@ class Program
 
         libros[totalLibros] = l;
         totalLibros++;
-
         Console.WriteLine("\n[✓] Libro registrado exitosamente.");
         Pausa();
     }
@@ -200,9 +193,7 @@ class Program
 
         int indice = -1;
         for (int i = 0; i < totalLibros; i++)
-        {
             if (libros[i].Codigo == codigo) { indice = i; break; }
-        }
 
         if (indice == -1)
             Console.WriteLine("[!] No se encontró ningún libro con ese código.");
@@ -211,7 +202,6 @@ class Program
             Console.WriteLine("\n--- Datos del Libro ---");
             MostrarLibro(libros[indice]);
         }
-
         Pausa();
     }
 
@@ -229,7 +219,6 @@ class Program
                 MostrarLibro(libros[i]);
                 Console.WriteLine();
             }
-
         Pausa();
     }
 
@@ -242,9 +231,7 @@ class Program
 
         int indice = -1;
         for (int i = 0; i < totalLibros; i++)
-        {
             if (libros[i].Codigo == codigo) { indice = i; break; }
-        }
 
         if (indice == -1)
         {
@@ -254,13 +241,8 @@ class Program
         {
             bool tienePrestamo = false;
             for (int i = 0; i < totalPrestamos; i++)
-            {
                 if (prestamos[i].CodigoLibro == codigo && prestamos[i].Estado == "activo")
-                {
-                    tienePrestamo = true;
-                    break;
-                }
-            }
+                { tienePrestamo = true; break; }
 
             if (tienePrestamo)
             {
@@ -277,7 +259,6 @@ class Program
                 {
                     for (int i = indice; i < totalLibros - 1; i++)
                         libros[i] = libros[i + 1];
-
                     libros[totalLibros - 1] = new Libro();
                     totalLibros--;
                     Console.WriteLine("[✓] Libro eliminado exitosamente.");
@@ -286,11 +267,9 @@ class Program
                     Console.WriteLine("Operación cancelada.");
             }
         }
-
         Pausa();
     }
 
-    //Modulo B-Gestión de usuario
     static void MenuGestionUsuarios()
     {
         int opcion;
@@ -339,11 +318,11 @@ class Program
         Usuario u = new Usuario();
 
         // Validar carné: exactamente 8 dígitos numéricos 
+
         do
         {
             Console.Write("Carné (8 dígitos): ");
             u.Carne = Console.ReadLine().Trim();
-
             if (!ValidarCarne(u.Carne))
                 Console.WriteLine("[!] El carné debe tener exactamente 8 dígitos numéricos.\n");
             else if (ExisteCarneUsuario(u.Carne))
@@ -355,12 +334,12 @@ class Program
         u.NombreCompleto = LeerTextoObligatorio("Nombre completo: ");
         u.Carrera        = LeerTextoObligatorio("Carrera: ");
 
-        // Validar correo: debe contener '@' y un punto después 
+                // Validar correo: debe contener '@' y un punto después 
+
         do
         {
             Console.Write("Correo electrónico: ");
             u.CorreoElectronico = Console.ReadLine().Trim();
-
             if (!ValidarCorreo(u.CorreoElectronico))
                 Console.WriteLine("[!] Correo inválido. Debe contener '@' y un punto después.\n");
             else
@@ -372,7 +351,6 @@ class Program
 
         usuarios[totalUsuarios] = u;
         totalUsuarios++;
-
         Console.WriteLine("\n[✓] Usuario registrado exitosamente.");
         Pausa();
     }
@@ -386,9 +364,7 @@ class Program
 
         int indice = -1;
         for (int i = 0; i < totalUsuarios; i++)
-        {
             if (usuarios[i].Carne == carne) { indice = i; break; }
-        }
 
         if (indice == -1)
             Console.WriteLine("[!] No se encontró usuario con ese carné.");
@@ -397,7 +373,6 @@ class Program
             Console.WriteLine("\n--- Datos del Usuario ---");
             MostrarUsuario(usuarios[indice]);
         }
-
         Pausa();
     }
 
@@ -409,17 +384,11 @@ class Program
         string nombre = Console.ReadLine().Trim().ToLower();
 
         bool encontrado = false;
-
-        // Búsqueda parcial con Contains 
         for (int i = 0; i < totalUsuarios; i++)
         {
             if (usuarios[i].NombreCompleto.ToLower().Contains(nombre))
             {
-                if (!encontrado)
-                {
-                    Console.WriteLine("\n--- Resultados ---");
-                    encontrado = true;
-                }
+                if (!encontrado) { Console.WriteLine("\n--- Resultados ---"); encontrado = true; }
                 MostrarUsuario(usuarios[i]);
                 Console.WriteLine();
             }
@@ -427,7 +396,6 @@ class Program
 
         if (!encontrado)
             Console.WriteLine("[!] No se encontraron usuarios con ese nombre.");
-
         Pausa();
     }
 
@@ -445,13 +413,271 @@ class Program
                 MostrarUsuario(usuarios[i]);
                 Console.WriteLine();
             }
+        Pausa();
+    }
+
+    static void MenuGestionPrestamos()
+    {
+        int opcion;
+        do
+        {
+            Console.Clear();
+            Console.WriteLine("╔══════════════════════════════════════════════╗");
+            Console.WriteLine("║       MÓDULO C – GESTIÓN DE PRÉSTAMOS        ║");
+            Console.WriteLine("╠══════════════════════════════════════════════╣");
+            Console.WriteLine("║  1. Registrar nuevo préstamo                 ║");
+            Console.WriteLine("║  2. Registrar devolución                     ║");
+            Console.WriteLine("║  3. Historial de préstamos activos           ║");
+            Console.WriteLine("║  4. Actualizar estado de préstamo            ║");
+            Console.WriteLine("║  5. Reporte general de préstamos             ║");
+            Console.WriteLine("║  6. Exportar reporte a archivo .txt          ║");
+            Console.WriteLine("║  0. Volver al menú principal                 ║");
+            Console.WriteLine("╚══════════════════════════════════════════════╝");
+
+            opcion = LeerEntero("Seleccione una opción: ");
+
+            switch (opcion)
+            {
+                case 1: RegistrarPrestamo();         break;
+                case 2: RegistrarDevolucion();       break;
+                case 3: HistorialPrestamosActivos(); break;
+                case 4: ActualizarEstadoPrestamo();  break;
+                case 5: ReporteGeneralPrestamos();   break;
+                case 6: ExportarReporte();           break;
+                case 0: break;
+                default:
+                    Console.WriteLine("\n  [!] Opción inválida.\n");
+                    Pausa();
+                    break;
+            }
+        } while (opcion != 0);
+    }
+
+    static void RegistrarPrestamo()
+    {
+        Console.Clear();
+        Console.WriteLine("=== REGISTRAR NUEVO PRÉSTAMO ===\n");
+
+        if (totalPrestamos >= MAX_PRESTAMOS)
+        {
+            Console.WriteLine("[!] Se alcanzó el límite máximo de préstamos (" + MAX_PRESTAMOS + ").");
+            Pausa();
+            return;
+        }
+
+        Prestamo p = new Prestamo();
+
+        Console.Write("Carné del usuario: ");
+        p.CarneUsuario = Console.ReadLine().Trim();
+
+        Console.Write("Código del libro: ");
+        p.CodigoLibro = Console.ReadLine().Trim().ToUpper();
+
+        Console.Write("Fecha de préstamo (dd/mm/yyyy): ");
+        p.FechaPrestamo = Console.ReadLine().Trim();
+
+        Console.Write("Fecha estimada de devolución (dd/mm/yyyy): ");
+        p.FechaDevolucion = Console.ReadLine().Trim();
+
+        p.Id     = totalPrestamos + 1;
+        p.Estado = "activo";
+
+
+        int indiceLibro = BuscarIndiceLibro(p.CodigoLibro);
+        if (indiceLibro != -1)
+            libros[indiceLibro].EjemplaresDisponibles--;
+
+        prestamos[totalPrestamos] = p;
+        totalPrestamos++;
+
+        Console.WriteLine("\n[✓] Préstamo registrado. ID: " + p.Id);
+        Pausa();
+    }
+
+    static void RegistrarDevolucion()
+    {
+        Console.Clear();
+        Console.WriteLine("=== REGISTRAR DEVOLUCIÓN ===\n");
+        int id = LeerEntero("Ingrese el ID del préstamo: ");
+
+        int indice = -1;
+        for (int i = 0; i < totalPrestamos; i++)
+            if (prestamos[i].Id == id) { indice = i; break; }
+
+        if (indice == -1)
+        {
+            Console.WriteLine("[!] No se encontró préstamo con ese ID.");
+        }
+        else if (prestamos[indice].Estado == "devuelto")
+        {
+            Console.WriteLine("[!] Ese préstamo ya fue devuelto.");
+        }
+        else
+        {
+            Console.WriteLine("\nPréstamo encontrado:");
+            MostrarPrestamo(prestamos[indice]);
+            Console.Write("\n¿Confirmar devolución? (s/n): ");
+            string conf = Console.ReadLine().Trim().ToLower();
+
+            if (conf == "s")
+            {
+                prestamos[indice].Estado = "devuelto";
+
+                int idxLibro = BuscarIndiceLibro(prestamos[indice].CodigoLibro);
+                if (idxLibro != -1)
+                    libros[idxLibro].EjemplaresDisponibles++;
+
+                Console.WriteLine("[✓] Devolución registrada. Inventario actualizado.");
+            }
+            else
+                Console.WriteLine("Operación cancelada.");
+        }
+        Pausa();
+    }
+
+    static void HistorialPrestamosActivos()
+    {
+        Console.Clear();
+        Console.WriteLine("=== HISTORIAL DE PRÉSTAMOS ACTIVOS ===\n");
+        Console.Write("Ingrese el carné del usuario: ");
+        string carne = Console.ReadLine().Trim();
+
+        bool encontrado = false;
+        for (int i = 0; i < totalPrestamos; i++)
+        {
+            if (prestamos[i].CarneUsuario == carne && prestamos[i].Estado == "activo")
+            {
+                if (!encontrado)
+                {
+                    Console.WriteLine("Préstamos activos para carné " + carne + ":\n");
+                    encontrado = true;
+                }
+                MostrarPrestamo(prestamos[i]);
+                Console.WriteLine();
+            }
+        }
+
+        if (!encontrado)
+            Console.WriteLine("[!] No se encontraron préstamos activos para ese carné.");
+        Pausa();
+    }
+
+    static void ActualizarEstadoPrestamo()
+    {
+        Console.Clear();
+        Console.WriteLine("=== ACTUALIZAR ESTADO DE PRÉSTAMO ===\n");
+        int id = LeerEntero("ID del préstamo: ");
+
+        int indice = -1;
+        for (int i = 0; i < totalPrestamos; i++)
+            if (prestamos[i].Id == id) { indice = i; break; }
+
+        if (indice == -1)
+        {
+            Console.WriteLine("[!] No se encontró préstamo con ese ID.");
+        }
+        else
+        {
+            Console.WriteLine("Estado actual: " + prestamos[indice].Estado);
+            Console.Write("Nuevo estado (activo/devuelto): ");
+            string nuevoEstado = Console.ReadLine().Trim().ToLower();
+
+            if (nuevoEstado == "activo" || nuevoEstado == "devuelto")
+            {
+                prestamos[indice].Estado = nuevoEstado;
+                Console.WriteLine("[✓] Estado actualizado.");
+            }
+            else
+                Console.WriteLine("[!] Estado inválido. Use 'activo' o 'devuelto'.");
+        }
+        Pausa();
+    }
+
+    static void ReporteGeneralPrestamos()
+    {
+        Console.Clear();
+        Console.WriteLine("=== REPORTE GENERAL DE PRÉSTAMOS ===\n");
+
+
+        int[,] resumen = new int[MAX_LIBROS, 2];
+
+        int activos   = 0;
+        int devueltos = 0;
+
+        for (int i = 0; i < totalPrestamos; i++)
+        {
+            if (prestamos[i].Estado == "activo")
+                activos++;
+            else
+                devueltos++;
+
+            int idxL = BuscarIndiceLibro(prestamos[i].CodigoLibro);
+            if (idxL != -1)
+            {
+                if (prestamos[i].Estado == "activo")
+                    resumen[idxL, 0]++;
+                else
+                    resumen[idxL, 1]++;
+            }
+        }
+
+        Console.WriteLine("Total préstamos registrados : " + totalPrestamos);
+        Console.WriteLine("Préstamos activos           : " + activos);
+        Console.WriteLine("Préstamos devueltos         : " + devueltos);
+
+        Console.WriteLine("\n--- Resumen por libro ---");
+        Console.WriteLine("{0,-10} {1,-30} {2,-10} {3,-10}", "Código", "Título", "Activos", "Devueltos");
+        Console.WriteLine(new string('-', 65));
+
+        for (int i = 0; i < totalLibros; i++)
+        {
+            string titulo = libros[i].Titulo.Length > 28
+                ? libros[i].Titulo.Substring(0, 28) + ".."
+                : libros[i].Titulo;
+
+            Console.WriteLine("{0,-10} {1,-30} {2,-10} {3,-10}",
+                libros[i].Codigo, titulo, resumen[i, 0], resumen[i, 1]);
+        }
 
         Pausa();
     }
 
-   //validaciones
+    static void ExportarReporte()
+    {
+        Console.Clear();
+        Console.WriteLine("=== EXPORTAR REPORTE A ARCHIVO ===\n");
 
-    // Código de libro: 8 caracteres alfanuméricos
+        string nombreArchivo = "Data/reporte_prestamos.txt";
+
+
+        using (StreamWriter sw = new StreamWriter(nombreArchivo, false))
+        {
+            sw.WriteLine("REPORTE DE PRÉSTAMOS – BIBLIOTECA UDB");
+            sw.WriteLine("Fecha de exportación: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+            sw.WriteLine(new string('=', 60));
+
+            for (int i = 0; i < totalPrestamos; i++)
+            {
+                sw.WriteLine("ID          : " + prestamos[i].Id);
+                sw.WriteLine("Carné       : " + prestamos[i].CarneUsuario);
+                sw.WriteLine("Código libro: " + prestamos[i].CodigoLibro);
+                sw.WriteLine("Préstamo    : " + prestamos[i].FechaPrestamo);
+                sw.WriteLine("Devolución  : " + prestamos[i].FechaDevolucion);
+                sw.WriteLine("Estado      : " + prestamos[i].Estado);
+                sw.WriteLine(new string('-', 40));
+            }
+
+            sw.WriteLine("Total registros: " + totalPrestamos);
+        }
+
+        Console.WriteLine("[✓] Reporte exportado a: " + nombreArchivo);
+        Pausa();
+    }
+
+       //validaciones
+
+     // Código de libro: 8 caracteres alfanuméricos
+
     static bool ValidarCodigoLibro(string codigo)
     {
         if (codigo.Length != 8) return false;
@@ -469,7 +695,7 @@ class Program
         return true;
     }
 
-    // Correo: debe tener '@' y un punto después de él
+    // Correo: debe contener '@' y un punto después de el
     static bool ValidarCorreo(string correo)
     {
         int posArroba = correo.IndexOf('@');
@@ -506,7 +732,6 @@ class Program
         return -1;
     }
 
-    
 
     static void MostrarLibro(Libro l)
     {
@@ -539,7 +764,7 @@ class Program
         Console.WriteLine("  Estado       : " + p.Estado);
     }
 
-    
+
     static int LeerEntero(string mensaje)
     {
         int valor;
