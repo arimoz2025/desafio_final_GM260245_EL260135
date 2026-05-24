@@ -1,0 +1,8 @@
+# Carpetas de compilación de .NET
+bin/
+obj/
+
+# Otros archivos ignorados
+.vs/
+*.user
+Data/
