@@ -469,7 +469,9 @@ namespace BibliotecaUniversitariaAI
             // Validar que el usuario exista y esté activo
             do
             {
-                p.CarneUsuario = LeerCadenaSegura("🪪 Carné del usuario: ");
+                p.CarneUsuario = LeerCadenaSegura("🪪 Carné del usuario (0 para cancelar): ");
+                if (p.CarneUsuario == "0") { ImprimirError("❌ Registro de préstamo cancelado."); return; }
+                
                 int idxU = BuscarIndiceUsuario(p.CarneUsuario);
                 if (idxU == -1)
                     ImprimirError("❌ No existe usuario con ese carné.");
@@ -482,7 +484,9 @@ namespace BibliotecaUniversitariaAI
             // Validar que el libro exista y tenga disponibilidad
             do
             {
-                p.CodigoLibro = LeerCadenaSegura("🔖 Código del libro: ").ToUpper();
+                p.CodigoLibro = LeerCadenaSegura("🔖 Código del libro (0 para cancelar): ").ToUpper();
+                if (p.CodigoLibro == "0") { ImprimirError("❌ Registro de préstamo cancelado."); return; }
+                
                 int idxL = BuscarIndiceLibro(p.CodigoLibro);
                 if (idxL == -1)
                     ImprimirError("❌ El libro no existe en el catálogo.");

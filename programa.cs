@@ -470,8 +470,16 @@ class Program
 
         do
         {
-            Console.Write("Carné del usuario: ");
+            Console.Write("Carné del usuario (0 para cancelar): ");
             p.CarneUsuario = Console.ReadLine().Trim();
+            
+            if (p.CarneUsuario == "0")
+            {
+                Console.WriteLine("\n[!] Registro de préstamo cancelado.");
+                Pausa();
+                return;
+            }
+
             int idxU = BuscarIndiceUsuario(p.CarneUsuario);
 
             if (idxU == -1)
@@ -484,8 +492,16 @@ class Program
 
         do
         {
-            Console.Write("Código del libro: ");
+            Console.Write("Código del libro (0 para cancelar): ");
             p.CodigoLibro = Console.ReadLine().Trim().ToUpper();
+            
+            if (p.CodigoLibro == "0")
+            {
+                Console.WriteLine("\n[!] Registro de préstamo cancelado.");
+                Pausa();
+                return;
+            }
+
             int idxL = BuscarIndiceLibro(p.CodigoLibro);
 
             if (idxL == -1)
