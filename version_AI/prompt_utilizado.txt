@@ -1,0 +1,14 @@
+Actúa como un programador experto en C# y desarrolla un "Sistema Integral de Gestión de Biblioteca Universitaria" en una aplicación de consola.
+
+Debes cumplir estrictamente con los siguientes requerimientos técnicos:
+1. Utiliza `struct` para definir tres entidades: Libro, Usuario y Préstamo.
+2. El almacenamiento en memoria debe ser utilizando arreglos (arrays) unidemensionales estáticos de tamaño fijo (ej. const int MAX_LIBROS = 100). NO utilices colecciones dinámicas como List<T>.
+3. El programa debe estar estructurado en un menú principal con submódulos.
+4. Módulo A (Libros): Registrar, buscar, listar y eliminar libros. Validar que el código del libro sea de 8 caracteres alfanuméricos.
+5. Módulo B (Usuarios): Registrar, buscar por carné, buscar por nombre parcial y listar usuarios. Validar que el carné sea de 8 dígitos y el correo tenga un formato básico con '@' y '.'.
+6. Módulo C (Préstamos): Registrar préstamo (validando stock e inventario), registrar devolución, ver historial de préstamos activos de un usuario, y un reporte general.
+7. Es de carácter obligatorio utilizar una matriz (arreglo bidimensional, ej. int[,]) para generar el reporte estadístico de préstamos (libros activos vs devueltos).
+8. Persistencia de datos: El sistema debe cargar los datos al iniciar y guardarlos al salir usando System.IO (`StreamReader` y `StreamWriter`). Libros en `.csv` y los demás en `.txt` separados por algún delimitador.
+9. Incluye validaciones robustas para la entrada de datos (fechas en formato dd/mm/yyyy y `try-catch` para evitar caídas con números).
+
+Genera todo el código en un único archivo, bien comentado y listo para compilar.
