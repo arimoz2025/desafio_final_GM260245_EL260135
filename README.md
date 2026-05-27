@@ -52,5 +52,7 @@ Asegúrate de tener instalado el SDK de **.NET (versión 6.0 o superior, probado
    ```bash
    dotnet run
    ```
+### Video explicativo
+https://udbedu-my.sharepoint.com/:v:/g/personal/gm260245_alumno_udb_edu_sv/IQBF9wvoaQ1dR4XGKlNHDQwLAXuHIBHt-ImUuEB2Ps7civg?e=i92SWr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
 
 *(Nota: La versión de la IA configura automáticamente tu terminal a UTF-8 para renderizar correctamente la interfaz en caso de caracteres especiales).*
